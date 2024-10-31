@@ -1322,6 +1322,53 @@ def test_md_header_text_splitter_with_invisible_characters(characters: str) -> N
 
     assert output == expected_output
 
+def test_md_header_text_splitter_with_nested_lists() -> None:
+    """Test markdown splitter with nested bullet lists."""
+
+    markdown_document = (
+        "# Main Topic\n\n"
+        "## Section 1\n\n"
+        "* Top level item 1\n"
+        "  * Nested item 1.1\n"
+        "  * Nested item 1.2\n"
+        "    * Deep nested item 1.2.1\n"
+        "* Top level item 2\n\n"
+        "## Section 2\n\n"
+        "* Another list\n"
+        "  * With nesting\n"
+    )
+    headers_to_split_on = [
+        ("#", "Header 1"),
+        ("##", "Header 2"),
+    ]
+    markdown_splitter = MarkdownHeaderTextSplitter(
+        headers_to_split_on=headers_to_split_on,
+        strip_headers=False,
+    )
+    output = markdown_splitter.split_text(markdown_document)
+    expected_output = [
+        Document(
+            page_content=(
+                "# Main Topic  \n"
+                "## Section 1  \n"
+                "* Top level item 1\n"
+                "  * Nested item 1.1\n"
+                "  * Nested item 1.2\n"
+                "    * Deep nested item 1.2.1\n"
+                "* Top level item 2"
+            ),
+            metadata={"Header 1": "Main Topic", "Header 2": "Section 1"},
+        ),
+        Document(
+            page_content=(
+                "## Section 2  \n"
+                "* Another list\n"
+                "  * With nesting"
+            ),
+            metadata={"Header 1": "Main Topic", "Header 2": "Section 2"},
+        ),
+    ]
+    assert output == expected_output
 
 EXPERIMENTAL_MARKDOWN_DOCUMENT = (
     "# My Header 1\n"

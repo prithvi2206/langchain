@@ -181,7 +181,10 @@ class MarkdownHeaderTextSplitter:
                     break
             else:
                 if stripped_line:
-                    current_content.append(stripped_line)
+                    if line.lstrip().startswith(('*', '-')):
+                        current_content.append(line.rstrip())
+                    else:
+                        current_content.append(stripped_line)
                 elif current_content:
                     lines_with_metadata.append(
                         {
